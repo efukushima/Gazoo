@@ -1,10 +1,16 @@
 package co.test.gazoo;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
+import android.annotation.SuppressLint;
 import android.app.DatePickerDialog;
 import android.content.ContentValues;
 import android.content.Intent;
@@ -13,14 +19,13 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Images;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -31,14 +36,18 @@ public class MainActivity extends ActionBarActivity {
 	private static Uri mImageUri = null;
 	private static Uri mTmpImageUri = null;
 	private static DatePickerDialog datePickerDialog; 
+	private EditText editComment = null;
+	private Button btnDate = null;
+	
+	Calendar calendar = Calendar.getInstance();
+	int year = calendar.get(Calendar.YEAR);
+	int monthOfYear = calendar.get(Calendar.MONTH);
+	int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
 	
 	DatePickerDialog.OnDateSetListener DateSetListener = new DatePickerDialog.OnDateSetListener() {
 		public void onDateSet(android.widget.DatePicker datePicker, int year,
 				int monthOfYear, int dayOfMonth){
-			Toast.makeText(co.test.gazoo.MainActivity.this,
-					"year:" + year + "monthOfYear:" + monthOfYear
-							+ "dayOfMonth:" + dayOfMonth, Toast.LENGTH_SHORT)
-					.show();
+			btnDate.setText(year + "年" + (monthOfYear+1)+ "月" + dayOfMonth + "日");
 			Log.d("DatePicker", "year:" + year + "monthOfYear:" + monthOfYear
 					+ "dayOfMonth:" + dayOfMonth);
 		}
@@ -49,9 +58,12 @@ public class MainActivity extends ActionBarActivity {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
+		editComment = (EditText)findViewById(R.id.editComment);
+		btnDate = (Button)findViewById(R.id.btnDate);
 		if(mImageUri!=null){
 			this.setPhoto();
 		}
+		
 	}
 
 	@Override
@@ -76,11 +88,6 @@ public class MainActivity extends ActionBarActivity {
 		
 	public void onSelectDate(View v){
 		//日付の選択
-		Calendar calendar = Calendar.getInstance();
-		int year = calendar.get(Calendar.YEAR);
-		int monthOfYear = calendar.get(Calendar.MONTH);
-		int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
-		
 		datePickerDialog = new DatePickerDialog(this,
 				android.R.style.Theme_Black_NoTitleBar, DateSetListener,
 				year, monthOfYear, dayOfMonth);
@@ -110,6 +117,42 @@ public class MainActivity extends ActionBarActivity {
 	        }
 	    }
 	}
+	
+			//保存ボタン時のアクション
+			public void onSave(View v){
+				//ひとまず.txtで保存する
+				try{
+					String str = editComment.getText().toString();
+					FileOutputStream out = openFileOutput("test.txt", MODE_PRIVATE);
+					out.write(str.getBytes());
+				}catch(IOException e){
+					e.printStackTrace();
+				}	
+			}
+		
+			//検索ボタン時のアクション→ロードのアクション
+			public void onLoad(View v){
+				//とりあえず.ｔｘｔデータをロードする
+				try{
+					FileInputStream in = openFileInput("test.txt");
+					BufferedReader reader = new BufferedReader(new InputStreamReader(in,
+							"UTF-8"));
+					String tmp;
+					int i=0;
+					editComment.setText("");
+					while((tmp = reader.readLine()) != null){
+						if(i==0){
+							editComment.append(tmp);
+							i++;
+						}else{
+							editComment.append("\n"+(tmp));
+						}
+					}
+					reader.close();
+				}catch(IOException e){
+					e.printStackTrace();
+				}
+			}
 	
 	/**
 	 * 画像の表示
@@ -146,7 +189,8 @@ public class MainActivity extends ActionBarActivity {
      * 画像のUriの取得
      * @return
      */
-    private Uri getPhotoUri() {
+    @SuppressLint("SimpleDateFormat")
+	private Uri getPhotoUri() {
         long currentTimeMillis = System.currentTimeMillis();
         Date today = new Date(currentTimeMillis);
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");

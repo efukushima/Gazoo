@@ -75,6 +75,27 @@
             android:textSize="24sp"
             android:onClick="onSelectDate" />
 
+        <Button
+            android:id="@+id/btnLoad"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/btnDate"
+            android:textColor="@color/text"
+            android:text="load"
+            android:textSize="24sp"
+            android:onClick="onLoad" />
+        
+        <Button
+            android:id="@+id/btnSave"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentLeft="true"
+            android:layout_below="@+id/btnLoad"
+            android:textColor="@color/text"
+            android:text="save"
+            android:textSize="24sp"
+            android:onClick="onSave" />
     </RelativeLayout>
 
 </ScrollView>
