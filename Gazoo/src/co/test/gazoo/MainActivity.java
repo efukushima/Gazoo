@@ -3,7 +3,9 @@ package co.test.gazoo;
 import java.io.File;
 import java.sql.Date;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
+import android.app.DatePickerDialog;
 import android.content.ContentValues;
 import android.content.Intent;
 import android.net.Uri;
@@ -11,18 +13,36 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.MediaStore.Images;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 public class MainActivity extends ActionBarActivity {
 
 	private static final int REQUEST_IMAGE_CAPTURE = 0;
 	private static final String TAG = null;
 	private static Uri mImageUri = null;
+	private static Uri mTmpImageUri = null;
+	private static DatePickerDialog datePickerDialog; 
+	
+	DatePickerDialog.OnDateSetListener DateSetListener = new DatePickerDialog.OnDateSetListener() {
+		public void onDateSet(android.widget.DatePicker datePicker, int year,
+				int monthOfYear, int dayOfMonth){
+			Toast.makeText(co.test.gazoo.MainActivity.this,
+					"year:" + year + "monthOfYear:" + monthOfYear
+							+ "dayOfMonth:" + dayOfMonth, Toast.LENGTH_SHORT)
+					.show();
+			Log.d("DatePicker", "year:" + year + "monthOfYear:" + monthOfYear
+					+ "dayOfMonth:" + dayOfMonth);
+		}
+	};
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -30,10 +50,8 @@ public class MainActivity extends ActionBarActivity {
 		setContentView(R.layout.activity_main);
 		
 		if(mImageUri!=null){
-			ImageView imageView = (ImageView) findViewById(R.id.imageView);
-	    	imageView.setImageURI(mImageUri);
+			this.setPhoto();
 		}
-		
 	}
 
 	@Override
@@ -55,15 +73,23 @@ public class MainActivity extends ActionBarActivity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
-
-	public void onClickToIntent(View v){
-		//カメラへの暗黙インテント
-		/*Intent iToCamera = new Intent();
-		iToCamera.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
-		iToCamera.addCategory(Intent.CATEGORY_DEFAULT);
-		startActivityForResult(iToCamera, REQUEST_IMAGE_CAPTURE);
-		*/
-		//Uriでの呼び出し
+		
+	public void onSelectDate(View v){
+		//日付の選択
+		Calendar calendar = Calendar.getInstance();
+		int year = calendar.get(Calendar.YEAR);
+		int monthOfYear = calendar.get(Calendar.MONTH);
+		int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+		
+		datePickerDialog = new DatePickerDialog(this,
+				android.R.style.Theme_Black_NoTitleBar, DateSetListener,
+				year, monthOfYear, dayOfMonth);
+		datePickerDialog.show();
+	}
+	
+	public void onClickToCamera(View v){
+		//画像をUriで取得する
+		mTmpImageUri = mImageUri;
 		mImageUri = getPhotoUri();
 		Intent intent = new Intent();
 		intent.setAction(MediaStore.ACTION_IMAGE_CAPTURE);
@@ -77,16 +103,25 @@ public class MainActivity extends ActionBarActivity {
 	    if (requestCode == REQUEST_IMAGE_CAPTURE) {
 	        Log.d(TAG, "onActivityResult");
 	        if (resultCode == RESULT_OK) {
-	        	ImageView imageView = (ImageView) findViewById(R.id.imageView);
-	        	imageView.setImageURI(mImageUri);
+	        	this.setPhoto();
+	        }else{
+	        	mImageUri = mTmpImageUri;
+	        	this.setPhoto();
 	        }
 	    }
 	}
 	
+	/**
+	 * 画像の表示
+	 */
+	public void setPhoto(){
+		ImageView imageView = (ImageView)findViewById(R.id.imageView);
+    	imageView.setImageURI(mImageUri);		
+	}
+	
 	
 	/**
-     * 画像のディレクトリパスを取得する
-     * 
+     * 画像のディレクトリパスの取得
      * @return
      */
     private String getDirPath() {
@@ -108,8 +143,7 @@ public class MainActivity extends ActionBarActivity {
     }
  
     /**
-     * 画像のUriを取得する
-     * 
+     * 画像のUriの取得
      * @return
      */
     private Uri getPhotoUri() {
@@ -135,3 +169,4 @@ public class MainActivity extends ActionBarActivity {
     }
 
 }
+

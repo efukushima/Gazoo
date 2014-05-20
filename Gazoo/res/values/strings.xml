@@ -5,7 +5,9 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_memo">MemoActivity</string>
-    <string name="intentToCamera">カメラ起動</string>
     <string name="comment">●コメント・メモ</string>
+    <string name="dataText">●日時</string>
+    <string name="textSize">24sp</string>
+    <string name="title_activity_grid_page">GridPage</string>
 
 </resources>
