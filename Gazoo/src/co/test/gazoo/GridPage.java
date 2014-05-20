@@ -1,25 +1,43 @@
 package co.test.gazoo;
 
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.GridView;
+import android.widget.LinearLayout;
 
 public class GridPage extends ActionBarActivity {
+	//View—p
+	private final int WC = ViewGroup.LayoutParams.WRAP_CONTENT;
+	private final int MP = ViewGroup.LayoutParams.MATCH_PARENT;
 
+	private String[] animal = {"1","2","3","4","66","12"};
+			
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_grid_page);
-
-		if (savedInstanceState == null) {
-			getSupportFragmentManager().beginTransaction()
-					.add(R.id.containerGrid, new PlaceholderFragment()).commit();
-		}
+				
+		LinearLayout linearLayout = new LinearLayout(this);
+		linearLayout.setOrientation(LinearLayout.HORIZONTAL);
+		setContentView(linearLayout);
+				
+		GridView grid =new GridView(this);
+		grid.setNumColumns(3);
+		linearLayout.addView(grid, createParam(WC, MP));
+				
+		ArrayAdapter<String> arrayAdapter 
+		= new ArrayAdapter<String>(this, R.layout.row, R.id.textViews, animal);
+				
+		grid.setAdapter(arrayAdapter);
+	}
+			
+	private LinearLayout.LayoutParams createParam(int w,int h){
+		return new LinearLayout.LayoutParams(w, h);
 	}
 
 	@Override
@@ -41,22 +59,10 @@ public class GridPage extends ActionBarActivity {
 		}
 		return super.onOptionsItemSelected(item);
 	}
-
-	/**
-	 * A placeholder fragment containing a simple view.
-	 */
-	public static class PlaceholderFragment extends Fragment {
-
-		public PlaceholderFragment() {
-		}
-
-		@Override
-		public View onCreateView(LayoutInflater inflater, ViewGroup container,
-				Bundle savedInstanceState) {
-			View rootView = inflater.inflate(R.layout.fragment_grid_page,
-					container, false);
-			return rootView;
-		}
+	
+	public void onIntent(View v){
+		this.finish();
 	}
+	
 
 }

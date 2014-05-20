@@ -27,7 +27,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.Toast;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -39,10 +38,10 @@ public class MainActivity extends ActionBarActivity {
 	private EditText editComment = null;
 	private Button btnDate = null;
 	
-	Calendar calendar = Calendar.getInstance();
-	int year = calendar.get(Calendar.YEAR);
-	int monthOfYear = calendar.get(Calendar.MONTH);
-	int dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+	private static Calendar calendar;
+	private static int year;
+	private static int monthOfYear;
+	private static int dayOfMonth;
 	
 	DatePickerDialog.OnDateSetListener DateSetListener = new DatePickerDialog.OnDateSetListener() {
 		public void onDateSet(android.widget.DatePicker datePicker, int year,
@@ -60,6 +59,13 @@ public class MainActivity extends ActionBarActivity {
 		
 		editComment = (EditText)findViewById(R.id.editComment);
 		btnDate = (Button)findViewById(R.id.btnDate);
+		
+		calendar = Calendar.getInstance();
+		year = calendar.get(Calendar.YEAR);
+		monthOfYear = calendar.get(Calendar.MONTH);
+		dayOfMonth = calendar.get(Calendar.DAY_OF_MONTH);
+		btnDate.setText(year + "年" + (monthOfYear+1)+ "月" + dayOfMonth + "日");
+		
 		if(mImageUri!=null){
 			this.setPhoto();
 		}
@@ -107,6 +113,7 @@ public class MainActivity extends ActionBarActivity {
 	
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+		//カメラから戻ってきたときの処理
 	    if (requestCode == REQUEST_IMAGE_CAPTURE) {
 	        Log.d(TAG, "onActivityResult");
 	        if (resultCode == RESULT_OK) {
@@ -118,41 +125,46 @@ public class MainActivity extends ActionBarActivity {
 	    }
 	}
 	
-			//保存ボタン時のアクション
-			public void onSave(View v){
-				//ひとまず.txtで保存する
-				try{
-					String str = editComment.getText().toString();
-					FileOutputStream out = openFileOutput("test.txt", MODE_PRIVATE);
-					out.write(str.getBytes());
-				}catch(IOException e){
-					e.printStackTrace();
-				}	
-			}
+		//保存ボタン時のアクション
+		public void onSave(View v){
+			//ひとまず.txtで保存する
+			try{
+				String str = editComment.getText().toString(); 
+				FileOutputStream out = openFileOutput("test.txt", MODE_PRIVATE);
+				out.write(( str +"\t"+ year + monthOfYear + dayOfMonth).getBytes());
+
+				Intent intent = new Intent();
+				intent.setClass(getApplicationContext(), co.test.gazoo.GridPage.class);
+				startActivity(intent);
+				//this.finish();
+			}catch(IOException e){
+				e.printStackTrace();
+			}	
+		}
 		
-			//検索ボタン時のアクション→ロードのアクション
-			public void onLoad(View v){
-				//とりあえず.ｔｘｔデータをロードする
-				try{
-					FileInputStream in = openFileInput("test.txt");
-					BufferedReader reader = new BufferedReader(new InputStreamReader(in,
-							"UTF-8"));
-					String tmp;
-					int i=0;
-					editComment.setText("");
-					while((tmp = reader.readLine()) != null){
-						if(i==0){
-							editComment.append(tmp);
-							i++;
-						}else{
-							editComment.append("\n"+(tmp));
-						}
+		//検索ボタン時のアクション→ロードのアクション
+		public void onLoad(View v){
+		//とりあえず.ｔｘｔデータをロードする→インテント
+			try{
+				FileInputStream in = openFileInput("test.txt");
+				BufferedReader reader = new BufferedReader(new InputStreamReader(in,
+						"UTF-8"));
+				String tmp;
+				int i=0;
+				editComment.setText("");
+				while((tmp = reader.readLine()) != null){
+					if(i==0){
+						editComment.append(tmp);
+						i++;
+					}else{
+						editComment.append("\n"+(tmp));
 					}
-					reader.close();
+				}
+				reader.close();
 				}catch(IOException e){
 					e.printStackTrace();
 				}
-			}
+		}
 	
 	/**
 	 * 画像の表示
